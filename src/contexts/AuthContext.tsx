@@ -1,18 +1,18 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { User, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from 'firebase/auth';
-import { doc, setDoc, getDoc } from 'firebase/firestore';
-import { auth, db } from '@/lib/firebase';
+import { UserProfile } from '@/types';
+import { initializeDemoData } from '@/lib/demo-data';
 
-export interface UserProfile {
-  uid: string;
-  email: string;
-  role: 'admin' | 'cashier' | 'partner';
-  name: string;
-  createdAt: Date;
-}
+// Use demo auth for testing
+import { 
+  demoAuth, 
+  doc as demoDoc, 
+  getDoc as demoGetDoc, 
+  setDoc as demoSetDoc,
+  DemoUser 
+} from '@/lib/demo-auth';
 
 interface AuthContextType {
-  user: User | null;
+  user: DemoUser | null;
   userProfile: UserProfile | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
@@ -31,14 +31,17 @@ export const useAuth = () => {
 };
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<DemoUser | null>(null);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+    // Initialize demo data
+    initializeDemoData();
+    
+    const unsubscribe = demoAuth.onAuthStateChanged(async (user) => {
       if (user) {
-        const userDoc = await getDoc(doc(db, 'users', user.uid));
+        const userDoc = await demoGetDoc(demoDoc(null, 'users', user.uid));
         if (userDoc.exists()) {
           setUserProfile(userDoc.data() as UserProfile);
         }
@@ -54,11 +57,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const login = async (email: string, password: string) => {
-    await signInWithEmailAndPassword(auth, email, password);
+    await demoAuth.signInWithEmailAndPassword(email, password);
   };
 
   const register = async (email: string, password: string, name: string, role: 'admin' | 'cashier' | 'partner') => {
-    const { user } = await createUserWithEmailAndPassword(auth, email, password);
+    const { user } = await demoAuth.createUserWithEmailAndPassword(email, password);
     
     const userProfile: UserProfile = {
       uid: user.uid,
@@ -68,11 +71,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       createdAt: new Date(),
     };
 
-    await setDoc(doc(db, 'users', user.uid), userProfile);
+    await demoSetDoc(demoDoc(null, 'users', user.uid), userProfile);
   };
 
   const logout = async () => {
-    await signOut(auth);
+    await demoAuth.signOut();
   };
 
   const value = {

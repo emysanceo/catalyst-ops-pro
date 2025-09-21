@@ -6,8 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Plus, Search, Edit, Trash2, AlertTriangle } from 'lucide-react';
 import { Product } from '@/types';
 import { ProductForm } from './ProductForm';
-import { collection, getDocs, deleteDoc, doc } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+import { getDemoProducts, saveDemoProducts } from '@/lib/demo-data';
 import { useToast } from '@/hooks/use-toast';
 
 export const ProductManagement: React.FC = () => {
@@ -20,52 +19,13 @@ export const ProductManagement: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
-  // Mock data for demo
-  const mockProducts: Product[] = [
-    {
-      id: '1',
-      name: 'Premium Coffee Beans',
-      category: 'Beverages',
-      costPrice: 15.00,
-      sellPrice: 25.00,
-      stock: 50,
-      minStock: 10,
-      description: 'High-quality Arabica coffee beans',
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    },
-    {
-      id: '2',
-      name: 'Organic Tea Bags',
-      category: 'Beverages',
-      costPrice: 8.00,
-      sellPrice: 15.00,
-      stock: 75,
-      minStock: 15,
-      description: 'Organic green tea bags',
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    },
-    {
-      id: '3',
-      name: 'Croissant',
-      category: 'Bakery',
-      costPrice: 2.50,
-      sellPrice: 4.50,
-      stock: 5,
-      minStock: 20,
-      description: 'Fresh butter croissant',
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    },
-  ];
-
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        // For demo, using mock data
-        setProducts(mockProducts);
-        setFilteredProducts(mockProducts);
+        // Load from demo data system
+        const products = getDemoProducts();
+        setProducts(products);
+        setFilteredProducts(products);
       } catch (error) {
         console.error('Error fetching products:', error);
         toast({
@@ -104,8 +64,9 @@ export const ProductManagement: React.FC = () => {
   const handleDelete = async (productId: string) => {
     if (window.confirm('Are you sure you want to delete this product?')) {
       try {
-        // In real app, delete from Firebase
-        setProducts(products.filter(p => p.id !== productId));
+        const updatedProducts = products.filter(p => p.id !== productId);
+        setProducts(updatedProducts);
+        saveDemoProducts(updatedProducts);
         toast({
           title: 'Success',
           description: 'Product deleted successfully',
@@ -121,11 +82,15 @@ export const ProductManagement: React.FC = () => {
   };
 
   const handleSaveProduct = (product: Product) => {
+    let updatedProducts;
     if (editingProduct) {
-      setProducts(products.map(p => p.id === product.id ? product : p));
+      updatedProducts = products.map(p => p.id === product.id ? product : p);
     } else {
-      setProducts([...products, { ...product, id: Date.now().toString() }]);
+      updatedProducts = [...products, { ...product, id: Date.now().toString() }];
     }
+    
+    setProducts(updatedProducts);
+    saveDemoProducts(updatedProducts);
     setShowForm(false);
     setEditingProduct(null);
     toast({

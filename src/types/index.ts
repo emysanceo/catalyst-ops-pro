@@ -1,3 +1,11 @@
+export interface UserProfile {
+  uid: string;
+  email: string;
+  role: 'admin' | 'cashier' | 'partner';
+  name: string;
+  createdAt: Date;
+}
+
 export interface Product {
   id: string;
   name: string;
