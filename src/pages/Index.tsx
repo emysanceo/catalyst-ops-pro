@@ -5,6 +5,10 @@ import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Dashboard } from '@/components/dashboard/Dashboard';
 import { ProductManagement } from '@/components/products/ProductManagement';
 import { SalesManagement } from '@/components/sales/SalesManagement';
+import { ExpenseManagement } from '@/components/expenses/ExpenseManagement';
+import { PartnerManagement } from '@/components/partners/PartnerManagement';
+import { ReportsAnalytics } from '@/components/reports/ReportsAnalytics';
+import { Settings } from '@/components/settings/Settings';
 
 const Index = () => {
   const { user, userProfile, loading } = useAuth();
@@ -26,41 +30,39 @@ const Index = () => {
   }
 
   const renderContent = () => {
+    // Role-based access control
+    const userRole = userProfile?.role || 'cashier';
+    
     switch (activeTab) {
       case 'dashboard':
         return <Dashboard />;
       case 'products':
+        if (!['admin', 'cashier'].includes(userRole)) {
+          return <div className="text-center py-12 text-muted-foreground">Access denied</div>;
+        }
         return <ProductManagement />;
       case 'sales':
+        if (!['admin', 'cashier'].includes(userRole)) {
+          return <div className="text-center py-12 text-muted-foreground">Access denied</div>;
+        }
         return <SalesManagement />;
       case 'expenses':
-        return (
-          <div className="text-center py-12">
-            <h2 className="text-2xl font-bold mb-4">Expense Management</h2>
-            <p className="text-muted-foreground">Coming soon...</p>
-          </div>
-        );
+        if (userRole !== 'admin') {
+          return <div className="text-center py-12 text-muted-foreground">Access denied</div>;
+        }
+        return <ExpenseManagement />;
       case 'partners':
-        return (
-          <div className="text-center py-12">
-            <h2 className="text-2xl font-bold mb-4">Partner Management</h2>
-            <p className="text-muted-foreground">Coming soon...</p>
-          </div>
-        );
+        if (userRole !== 'admin') {
+          return <div className="text-center py-12 text-muted-foreground">Access denied</div>;
+        }
+        return <PartnerManagement />;
       case 'reports':
-        return (
-          <div className="text-center py-12">
-            <h2 className="text-2xl font-bold mb-4">Reports & Analytics</h2>
-            <p className="text-muted-foreground">Coming soon...</p>
-          </div>
-        );
+        if (!['admin', 'partner'].includes(userRole)) {
+          return <div className="text-center py-12 text-muted-foreground">Access denied</div>;
+        }
+        return <ReportsAnalytics />;
       case 'settings':
-        return (
-          <div className="text-center py-12">
-            <h2 className="text-2xl font-bold mb-4">Settings</h2>
-            <p className="text-muted-foreground">Coming soon...</p>
-          </div>
-        );
+        return <Settings />;
       default:
         return <Dashboard />;
     }

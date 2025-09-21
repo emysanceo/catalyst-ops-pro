@@ -102,4 +102,26 @@ All colors MUST be HSL.
   body {
     @apply bg-background text-foreground;
   }
+
+  /* Mobile-specific optimizations */
+  @media (max-width: 768px) {
+    .mobile-optimized {
+      @apply px-4 py-2;
+    }
+    
+    .mobile-card {
+      @apply rounded-lg shadow-sm;
+    }
+    
+    .mobile-text {
+      @apply text-sm;
+    }
+  }
+
+  /* Improved touch targets for mobile */
+  @media (max-width: 768px) {
+    button, .clickable {
+      @apply min-h-[44px];
+    }
+  }
 }

@@ -1,3 +1,4 @@
+// Remove duplicate interfaces and fix types
 export interface UserProfile {
   uid: string;
   email: string;
@@ -45,9 +46,9 @@ export interface Expense {
   description: string;
   amount: number;
   category: string;
-  type: 'expense' | 'investment' | 'withdrawal';
-  createdAt: Date;
+  date: Date;
   createdBy: string;
+  createdAt: Date;
 }
 
 export interface Partner {
@@ -56,8 +57,16 @@ export interface Partner {
   email: string;
   sharePercentage: number;
   totalInvestment: number;
-  totalWithdrawal: number;
-  currentBalance: number;
+  totalWithdrawn: number;
+  createdAt: Date;
+}
+
+export interface PartnerTransaction {
+  id: string;
+  partnerId: string;
+  type: 'investment' | 'withdrawal' | 'profit_share';
+  amount: number;
+  description: string;
   createdAt: Date;
 }
 

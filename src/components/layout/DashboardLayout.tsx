@@ -2,6 +2,8 @@ import React from 'react';
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider, SidebarTrigger, SidebarHeader } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
+import { MobileBottomNav } from './MobileBottomNav';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { 
   LayoutDashboard, 
   Package, 
@@ -21,13 +23,13 @@ interface DashboardLayoutProps {
 }
 
 const menuItems = [
-  { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { id: 'products', label: 'Products', icon: Package },
-  { id: 'sales', label: 'Sales', icon: ShoppingCart },
-  { id: 'expenses', label: 'Expenses', icon: DollarSign },
-  { id: 'partners', label: 'Partners', icon: Users },
-  { id: 'reports', label: 'Reports', icon: BarChart3 },
-  { id: 'settings', label: 'Settings', icon: Settings },
+  { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, roles: ['admin', 'cashier', 'partner'] },
+  { id: 'products', label: 'Products', icon: Package, roles: ['admin', 'cashier'] },
+  { id: 'sales', label: 'Sales', icon: ShoppingCart, roles: ['admin', 'cashier'] },
+  { id: 'expenses', label: 'Expenses', icon: DollarSign, roles: ['admin'] },
+  { id: 'partners', label: 'Partners', icon: Users, roles: ['admin'] },
+  { id: 'reports', label: 'Reports', icon: BarChart3, roles: ['admin', 'partner'] },
+  { id: 'settings', label: 'Settings', icon: Settings, roles: ['admin', 'cashier', 'partner'] },
 ];
 
 export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ 
@@ -36,6 +38,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   onTabChange 
 }) => {
   const { logout, userProfile } = useAuth();
+  const isMobile = useIsMobile();
 
   const handleLogout = async () => {
     try {
@@ -44,6 +47,48 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
       console.error('Logout error:', error);
     }
   };
+
+  const accessibleItems = menuItems.filter(item => 
+    item.roles.includes(userProfile?.role || 'cashier')
+  );
+
+  if (isMobile) {
+    return (
+      <div className="min-h-screen pb-20 bg-background">
+        <header className="sticky top-0 z-40 border-b border-border bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60 px-4 py-3">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-lg font-semibold capitalize">
+                {menuItems.find(item => item.id === activeTab)?.label || 'Dashboard'}
+              </h1>
+              <p className="text-xs text-muted-foreground">
+                {userProfile?.name} ({userProfile?.role})
+              </p>
+            </div>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={handleLogout}
+              className="text-xs"
+            >
+              <LogOut className="h-3 w-3 mr-1" />
+              Logout
+            </Button>
+          </div>
+        </header>
+        
+        <main className="p-4">
+          {children}
+        </main>
+        
+        <MobileBottomNav
+          activeTab={activeTab}
+          onTabChange={onTabChange}
+          userRole={userProfile?.role || 'cashier'}
+        />
+      </div>
+    );
+  }
 
   return (
     <SidebarProvider>
@@ -63,7 +108,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
               <SidebarGroupLabel>Navigation</SidebarGroupLabel>
               <SidebarGroupContent>
                 <SidebarMenu>
-                  {menuItems.map((item) => {
+                  {accessibleItems.map((item) => {
                     const Icon = item.icon;
                     return (
                       <SidebarMenuItem key={item.id}>
