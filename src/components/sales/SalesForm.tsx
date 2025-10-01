@@ -156,7 +156,7 @@ export const SalesForm: React.FC<SalesFormProps> = ({ onComplete, onCancel }) =>
       discount: discountAmount,
       tax: taxAmount,
       paymentMethod,
-      cashierId: userProfile?.uid || '',
+      cashierId: userProfile?.id || '',
       createdAt: new Date(),
       profit: totalProfit,
     };

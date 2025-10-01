@@ -54,7 +54,7 @@ export const ExpenseManagement: React.FC = () => {
       amount: formData.amount,
       category: formData.category,
       date: new Date(formData.date),
-      createdBy: userProfile?.uid || '',
+      createdBy: userProfile?.id || '',
       createdAt: new Date(),
     };
 

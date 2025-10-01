@@ -49,7 +49,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   };
 
   const accessibleItems = menuItems.filter(item => 
-    item.roles.includes(userProfile?.role || 'cashier')
+    userProfile?.role && item.roles.includes(userProfile.role)
   );
 
   if (isMobile) {
