@@ -33,24 +33,26 @@ export const SalesForm: React.FC<SalesFormProps> = ({ onComplete, onCancel }) =>
     {
       id: '1',
       name: 'Premium Coffee Beans',
-      category: 'Beverages',
-      costPrice: 15.00,
-      sellPrice: 25.00,
+      description: 'High quality coffee beans',
+      cost_price: 15.00,
+      sell_price: 25.00,
       stock: 50,
-      minStock: 10,
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      min_stock: 10,
+      created_by: '',
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
     },
     {
       id: '2',
       name: 'Organic Tea Bags',
-      category: 'Beverages',
-      costPrice: 8.00,
-      sellPrice: 15.00,
+      description: 'Premium organic tea',
+      cost_price: 8.00,
+      sell_price: 15.00,
       stock: 75,
-      minStock: 15,
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      min_stock: 15,
+      created_by: '',
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
     },
   ];
 
@@ -93,9 +95,9 @@ export const SalesForm: React.FC<SalesFormProps> = ({ onComplete, onCancel }) =>
         productId: product.id,
         productName: product.name,
         quantity: 1,
-        unitPrice: product.sellPrice,
-        costPrice: product.costPrice,
-        total: product.sellPrice,
+        unitPrice: product.sell_price,
+        costPrice: product.cost_price,
+        total: product.sell_price,
         productData: product,
       };
       setCart([...cart, newItem]);
@@ -194,7 +196,7 @@ export const SalesForm: React.FC<SalesFormProps> = ({ onComplete, onCancel }) =>
                   <div>
                     <p className="font-medium">{product.name}</p>
                     <p className="text-sm text-muted-foreground">
-                      ${product.sellPrice.toFixed(2)} • Stock: {product.stock}
+                      ${product.sell_price.toFixed(2)} • Stock: {product.stock}
                     </p>
                   </div>
                   <Button

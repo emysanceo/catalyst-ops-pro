@@ -12,15 +12,14 @@ import { ArrowLeft } from 'lucide-react';
 
 const productSchema = z.object({
   name: z.string().min(1, 'Product name is required'),
-  category: z.string().min(1, 'Category is required'),
-  costPrice: z.number().min(0.01, 'Cost price must be greater than 0'),
-  sellPrice: z.number().min(0.01, 'Sell price must be greater than 0'),
-  stock: z.number().min(0, 'Stock cannot be negative'),
-  minStock: z.number().min(0, 'Minimum stock cannot be negative'),
   description: z.string().optional(),
-}).refine((data) => data.sellPrice > data.costPrice, {
+  cost_price: z.number().min(0.01, 'Cost price must be greater than 0'),
+  sell_price: z.number().min(0.01, 'Sell price must be greater than 0'),
+  stock: z.number().min(0, 'Stock cannot be negative'),
+  min_stock: z.number().min(0, 'Minimum stock cannot be negative'),
+}).refine((data) => data.sell_price > data.cost_price, {
   message: "Sell price must be greater than cost price",
-  path: ["sellPrice"],
+  path: ["sell_price"],
 });
 
 type ProductFormData = z.infer<typeof productSchema>;
@@ -41,42 +40,27 @@ export const ProductForm: React.FC<ProductFormProps> = ({ product, onSave, onCan
     resolver: zodResolver(productSchema),
     defaultValues: product ? {
       name: product.name,
-      category: product.category,
-      costPrice: product.costPrice,
-      sellPrice: product.sellPrice,
-      stock: product.stock,
-      minStock: product.minStock,
       description: product.description || '',
+      cost_price: product.cost_price,
+      sell_price: product.sell_price,
+      stock: product.stock,
+      min_stock: product.min_stock,
     } : {
       name: '',
-      category: '',
-      costPrice: 0,
-      sellPrice: 0,
-      stock: 0,
-      minStock: 0,
       description: '',
+      cost_price: 0,
+      sell_price: 0,
+      stock: 0,
+      min_stock: 0,
     },
   });
 
-  const costPrice = watch('costPrice');
-  const sellPrice = watch('sellPrice');
-  const profitMargin = sellPrice > 0 ? ((sellPrice - costPrice) / sellPrice * 100).toFixed(1) : '0';
+  const cost_price = watch('cost_price');
+  const sell_price = watch('sell_price');
+  const profitMargin = sell_price > 0 ? ((sell_price - cost_price) / sell_price * 100).toFixed(1) : '0';
 
   const onSubmit = (data: ProductFormData) => {
-    const productData: Product = {
-      id: product?.id || '',
-      name: data.name,
-      category: data.category,
-      costPrice: data.costPrice,
-      sellPrice: data.sellPrice,
-      stock: data.stock,
-      minStock: data.minStock,
-      description: data.description,
-      createdAt: product?.createdAt || new Date(),
-      updatedAt: new Date(),
-    };
-    
-    onSave(productData);
+    onSave(data as any);
   };
 
   return (
@@ -97,69 +81,55 @@ export const ProductForm: React.FC<ProductFormProps> = ({ product, onSave, onCan
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-            <div className="grid gap-4 md:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="name">Product Name</Label>
-                <Input
-                  id="name"
-                  placeholder="Enter product name"
-                  {...register('name')}
-                />
-                {errors.name && (
-                  <p className="text-sm text-destructive">{errors.name.message}</p>
-                )}
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="category">Category</Label>
-                <Input
-                  id="category"
-                  placeholder="Enter product category"
-                  {...register('category')}
-                />
-                {errors.category && (
-                  <p className="text-sm text-destructive">{errors.category.message}</p>
-                )}
-              </div>
+            <div className="space-y-2">
+              <Label htmlFor="name">Product Name</Label>
+              <Input
+                id="name"
+                placeholder="Enter product name"
+                {...register('name')}
+              />
+              {errors.name && (
+                <p className="text-sm text-destructive">{errors.name.message}</p>
+              )}
             </div>
 
             <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="costPrice">Cost Price ($)</Label>
+                <Label htmlFor="cost_price">Cost Price ($)</Label>
                 <Input
-                  id="costPrice"
+                  id="cost_price"
                   type="number"
                   step="0.01"
                   placeholder="0.00"
-                  {...register('costPrice', { valueAsNumber: true })}
+                  {...register('cost_price', { valueAsNumber: true })}
                 />
-                {errors.costPrice && (
-                  <p className="text-sm text-destructive">{errors.costPrice.message}</p>
+                {errors.cost_price && (
+                  <p className="text-sm text-destructive">{errors.cost_price.message}</p>
                 )}
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="sellPrice">Sell Price ($)</Label>
+                <Label htmlFor="sell_price">Sell Price ($)</Label>
                 <Input
-                  id="sellPrice"
+                  id="sell_price"
                   type="number"
                   step="0.01"
                   placeholder="0.00"
-                  {...register('sellPrice', { valueAsNumber: true })}
+                  {...register('sell_price', { valueAsNumber: true })}
                 />
-                {errors.sellPrice && (
-                  <p className="text-sm text-destructive">{errors.sellPrice.message}</p>
+                {errors.sell_price && (
+                  <p className="text-sm text-destructive">{errors.sell_price.message}</p>
                 )}
               </div>
             </div>
 
-            {sellPrice > 0 && costPrice > 0 && (
+            {sell_price > 0 && cost_price > 0 && (
               <div className="p-4 bg-muted rounded-lg">
                 <p className="text-sm text-muted-foreground">
                   Profit Margin: <span className="font-medium text-green-600">{profitMargin}%</span>
                 </p>
                 <p className="text-sm text-muted-foreground">
-                  Profit per unit: <span className="font-medium">${(sellPrice - costPrice).toFixed(2)}</span>
+                  Profit per unit: <span className="font-medium">${(sell_price - cost_price).toFixed(2)}</span>
                 </p>
               </div>
             )}
@@ -179,15 +149,15 @@ export const ProductForm: React.FC<ProductFormProps> = ({ product, onSave, onCan
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="minStock">Minimum Stock Alert</Label>
+                <Label htmlFor="min_stock">Minimum Stock Alert</Label>
                 <Input
-                  id="minStock"
+                  id="min_stock"
                   type="number"
                   placeholder="0"
-                  {...register('minStock', { valueAsNumber: true })}
+                  {...register('min_stock', { valueAsNumber: true })}
                 />
-                {errors.minStock && (
-                  <p className="text-sm text-destructive">{errors.minStock.message}</p>
+                {errors.min_stock && (
+                  <p className="text-sm text-destructive">{errors.min_stock.message}</p>
                 )}
               </div>
             </div>

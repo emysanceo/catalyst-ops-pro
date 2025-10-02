@@ -10,14 +10,17 @@ export interface UserProfile {
 export interface Product {
   id: string;
   name: string;
-  category: string;
-  costPrice: number;
-  sellPrice: number;
-  stock: number;
-  minStock: number;
   description?: string;
-  createdAt: Date;
-  updatedAt: Date;
+  category_id?: string;
+  cost_price: number;
+  sell_price: number;
+  stock: number;
+  min_stock: number;
+  barcode?: string;
+  image_url?: string;
+  created_by: string;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface Sale {
