@@ -193,10 +193,11 @@ export const ProductManagement: React.FC = () => {
       </div>
 
       {loading ? (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {[...Array(6)].map((_, i) => (
-            <Card key={i} className="animate-pulse">
-              <CardContent className="p-6">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {[...Array(8)].map((_, i) => (
+            <Card key={i} className="animate-pulse overflow-hidden">
+              <div className="aspect-square bg-muted" />
+              <CardContent className="p-4">
                 <div className="h-4 bg-muted rounded mb-2"></div>
                 <div className="h-6 bg-muted rounded mb-4"></div>
                 <div className="space-y-2">
@@ -208,53 +209,74 @@ export const ProductManagement: React.FC = () => {
           ))}
         </div>
       ) : (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {filteredProducts.map((product) => (
-            <Card key={product.id} className="relative">
+            <Card key={product.id} className="relative overflow-hidden flex flex-col">
               {product.stock <= product.min_stock && (
-                <div className="absolute top-2 right-2">
-                  <Badge variant="destructive" className="flex items-center gap-1">
+                <div className="absolute top-2 right-2 z-10">
+                  <Badge variant="destructive" className="flex items-center gap-1 shadow-lg">
                     <AlertTriangle className="h-3 w-3" />
                     Low Stock
                   </Badge>
                 </div>
               )}
               
-              <CardHeader>
-                <CardTitle className="text-lg">{product.name}</CardTitle>
+              {/* Product Image */}
+              <div className="relative aspect-square bg-muted overflow-hidden">
+                {product.image_url ? (
+                  <img 
+                    src={product.image_url} 
+                    alt={`${product.name} - Product image showing details and packaging`}
+                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                    loading="lazy"
+                    onError={(e) => {
+                      e.currentTarget.src = '/placeholder.svg';
+                      e.currentTarget.alt = 'Product image unavailable';
+                    }}
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-muted-foreground">
+                    <span className="text-sm">No image</span>
+                  </div>
+                )}
+              </div>
+              
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base line-clamp-2">{product.name}</CardTitle>
               </CardHeader>
               
-              <CardContent className="space-y-3">
-                <div className="grid grid-cols-2 gap-4 text-sm">
+              <CardContent className="space-y-3 flex-1 flex flex-col">
+                <div className="grid grid-cols-2 gap-3 text-sm">
                   <div>
-                    <p className="text-muted-foreground">Cost Price</p>
-                    <p className="font-medium">${product.cost_price.toFixed(2)}</p>
+                    <p className="text-xs text-muted-foreground">Cost</p>
+                    <p className="font-semibold">${product.cost_price.toFixed(2)}</p>
                   </div>
                   <div>
-                    <p className="text-muted-foreground">Sell Price</p>
-                    <p className="font-medium">${product.sell_price.toFixed(2)}</p>
+                    <p className="text-xs text-muted-foreground">Price</p>
+                    <p className="font-semibold">${product.sell_price.toFixed(2)}</p>
                   </div>
                   <div>
-                    <p className="text-muted-foreground">Stock</p>
-                    <p className={`font-medium ${product.stock <= product.min_stock ? 'text-destructive' : ''}`}>
-                      {product.stock} units
+                    <p className="text-xs text-muted-foreground">Stock</p>
+                    <p className={`font-semibold ${product.stock <= product.min_stock ? 'text-destructive' : ''}`}>
+                      {product.stock}
                     </p>
                   </div>
                   <div>
-                    <p className="text-muted-foreground">Profit Margin</p>
-                    <p className="font-medium text-green-600">{getProfitMargin(product)}%</p>
+                    <p className="text-xs text-muted-foreground">Margin</p>
+                    <p className="font-semibold text-green-600">{getProfitMargin(product)}%</p>
                   </div>
                 </div>
                 
                 {product.description && (
-                  <p className="text-sm text-muted-foreground">{product.description}</p>
+                  <p className="text-xs text-muted-foreground line-clamp-2">{product.description}</p>
                 )}
                 
-                <div className="flex gap-2 pt-2">
+                <div className="flex gap-2 pt-2 mt-auto">
                   <Button
                     size="sm"
                     variant="outline"
                     onClick={() => handleEdit(product)}
+                    className="flex-1"
                   >
                     <Edit className="mr-1 h-3 w-3" />
                     Edit
@@ -263,6 +285,7 @@ export const ProductManagement: React.FC = () => {
                     size="sm"
                     variant="destructive"
                     onClick={() => handleDelete(product.id)}
+                    className="flex-1"
                   >
                     <Trash2 className="mr-1 h-3 w-3" />
                     Delete

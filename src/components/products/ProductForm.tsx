@@ -13,6 +13,7 @@ import { ArrowLeft } from 'lucide-react';
 const productSchema = z.object({
   name: z.string().min(1, 'Product name is required'),
   description: z.string().optional(),
+  image_url: z.string().url('Must be a valid URL').optional().or(z.literal('')),
   cost_price: z.number().min(0.01, 'Cost price must be greater than 0'),
   sell_price: z.number().min(0.01, 'Sell price must be greater than 0'),
   stock: z.number().min(0, 'Stock cannot be negative'),
@@ -41,6 +42,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({ product, onSave, onCan
     defaultValues: product ? {
       name: product.name,
       description: product.description || '',
+      image_url: product.image_url || '',
       cost_price: product.cost_price,
       sell_price: product.sell_price,
       stock: product.stock,
@@ -48,6 +50,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({ product, onSave, onCan
     } : {
       name: '',
       description: '',
+      image_url: '',
       cost_price: 0,
       sell_price: 0,
       stock: 0,
@@ -160,6 +163,22 @@ export const ProductForm: React.FC<ProductFormProps> = ({ product, onSave, onCan
                   <p className="text-sm text-destructive">{errors.min_stock.message}</p>
                 )}
               </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="image_url">Image URL (Optional)</Label>
+              <Input
+                id="image_url"
+                type="url"
+                placeholder="https://example.com/product-image.jpg"
+                {...register('image_url')}
+              />
+              {errors.image_url && (
+                <p className="text-sm text-destructive">{errors.image_url.message}</p>
+              )}
+              <p className="text-xs text-muted-foreground">
+                Provide a URL to an image for this product
+              </p>
             </div>
 
             <div className="space-y-2">

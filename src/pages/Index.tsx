@@ -9,6 +9,7 @@ import { ExpenseManagement } from '@/components/expenses/ExpenseManagement';
 import { PartnerManagement } from '@/components/partners/PartnerManagement';
 import { ReportsAnalytics } from '@/components/reports/ReportsAnalytics';
 import { Settings } from '@/components/settings/Settings';
+import { OfflineIndicator } from '@/components/offline/OfflineIndicator';
 
 const Index = () => {
   const { user, userProfile, loading } = useAuth();
@@ -71,6 +72,7 @@ const Index = () => {
   return (
     <DashboardLayout activeTab={activeTab} onTabChange={setActiveTab}>
       {renderContent()}
+      <OfflineIndicator />
     </DashboardLayout>
   );
 };

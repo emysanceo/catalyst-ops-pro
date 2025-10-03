@@ -1,0 +1,56 @@
+{
+  "name": "Catalyst Ops Pro",
+  "short_name": "Catalyst",
+  "description": "Complete business operations management system",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#0EA5E9",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/placeholder.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/placeholder.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/placeholder.svg",
+      "sizes": "540x720",
+      "type": "image/svg+xml",
+      "form_factor": "narrow"
+    }
+  ],
+  "categories": ["business", "productivity", "finance"],
+  "shortcuts": [
+    {
+      "name": "Dashboard",
+      "short_name": "Dashboard",
+      "description": "View business dashboard",
+      "url": "/?tab=dashboard",
+      "icons": [{ "src": "/placeholder.svg", "sizes": "192x192" }]
+    },
+    {
+      "name": "Products",
+      "short_name": "Products",
+      "description": "Manage products",
+      "url": "/?tab=products",
+      "icons": [{ "src": "/placeholder.svg", "sizes": "192x192" }]
+    },
+    {
+      "name": "Sales",
+      "short_name": "Sales",
+      "description": "Record sales",
+      "url": "/?tab=sales",
+      "icons": [{ "src": "/placeholder.svg", "sizes": "192x192" }]
+    }
+  ]
+}
