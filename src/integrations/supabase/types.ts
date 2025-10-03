@@ -168,6 +168,7 @@ export type Database = {
           name: string
           sell_price: number
           stock: number
+          subcategory_id: string | null
           updated_at: string
         }
         Insert: {
@@ -183,6 +184,7 @@ export type Database = {
           name: string
           sell_price: number
           stock?: number
+          subcategory_id?: string | null
           updated_at?: string
         }
         Update: {
@@ -198,6 +200,7 @@ export type Database = {
           name?: string
           sell_price?: number
           stock?: number
+          subcategory_id?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -206,6 +209,13 @@ export type Database = {
             columns: ["category_id"]
             isOneToOne: false
             referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "products_subcategory_id_fkey"
+            columns: ["subcategory_id"]
+            isOneToOne: false
+            referencedRelation: "subcategories"
             referencedColumns: ["id"]
           },
         ]
@@ -383,6 +393,41 @@ export type Database = {
             columns: ["supplier_id"]
             isOneToOne: false
             referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      subcategories: {
+        Row: {
+          category_id: string
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          category_id: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          category_id?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subcategories_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
             referencedColumns: ["id"]
           },
         ]
