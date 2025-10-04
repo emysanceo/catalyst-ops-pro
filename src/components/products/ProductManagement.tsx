@@ -3,33 +3,23 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Search, Edit, Trash2, AlertTriangle } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Plus, Search, Edit, Trash2, AlertTriangle, Filter } from 'lucide-react';
 import { ProductForm } from './ProductForm';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-
-interface Product {
-  id: string;
-  name: string;
-  description?: string;
-  category_id?: string;
-  cost_price: number;
-  sell_price: number;
-  stock: number;
-  min_stock: number;
-  barcode?: string;
-  image_url?: string;
-  created_by: string;
-  created_at: string;
-  updated_at: string;
-}
+import { formatBDT } from '@/lib/formatters';
+import type { Product, Category, Subcategory } from '@/types';
 
 export const ProductManagement: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [selectedSubcategory, setSelectedSubcategory] = useState('all');
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [subcategories, setSubcategories] = useState<Subcategory[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
@@ -38,7 +28,17 @@ export const ProductManagement: React.FC = () => {
 
   useEffect(() => {
     fetchProducts();
+    fetchCategories();
   }, []);
+
+  useEffect(() => {
+    if (selectedCategory !== 'all') {
+      fetchSubcategories(selectedCategory);
+    } else {
+      setSubcategories([]);
+      setSelectedSubcategory('all');
+    }
+  }, [selectedCategory]);
 
   const fetchProducts = async () => {
     try {
@@ -63,13 +63,31 @@ export const ProductManagement: React.FC = () => {
     }
   };
 
+  const fetchCategories = async () => {
+    const { data } = await supabase.from('categories').select('*').order('name');
+    if (data) setCategories(data);
+  };
+
+  const fetchSubcategories = async (categoryId: string) => {
+    const { data } = await supabase
+      .from('subcategories')
+      .select('*')
+      .eq('category_id', categoryId)
+      .order('name');
+    if (data) setSubcategories(data);
+  };
+
   useEffect(() => {
-    let filtered = products.filter(product =>
-      product.name.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    let filtered = products.filter(product => {
+      const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesCategory = selectedCategory === 'all' || product.category_id === selectedCategory;
+      const matchesSubcategory = selectedSubcategory === 'all' || product.subcategory_id === selectedSubcategory;
+      
+      return matchesSearch && matchesCategory && matchesSubcategory;
+    });
 
     setFilteredProducts(filtered);
-  }, [products, searchTerm, selectedCategory]);
+  }, [products, searchTerm, selectedCategory, selectedSubcategory]);
 
   const handleEdit = (product: Product) => {
     setEditingProduct(product);
@@ -180,15 +198,69 @@ export const ProductManagement: React.FC = () => {
         </Button>
       </div>
 
-      <div className="flex flex-col sm:flex-row gap-4">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search products..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10"
-          />
+      <div className="flex flex-col gap-4">
+        <div className="flex flex-col sm:flex-row gap-4">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search products..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+        </div>
+
+        <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+          <div className="flex items-center gap-2">
+            <Filter className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm text-muted-foreground">Filter by:</span>
+          </div>
+          
+          <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+            <SelectTrigger className="w-full sm:w-[200px]">
+              <SelectValue placeholder="All Categories" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Categories</SelectItem>
+              {categories.map((cat) => (
+                <SelectItem key={cat.id} value={cat.id}>
+                  {cat.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <Select 
+            value={selectedSubcategory} 
+            onValueChange={setSelectedSubcategory}
+            disabled={selectedCategory === 'all' || subcategories.length === 0}
+          >
+            <SelectTrigger className="w-full sm:w-[200px]">
+              <SelectValue placeholder="All Subcategories" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Subcategories</SelectItem>
+              {subcategories.map((sub) => (
+                <SelectItem key={sub.id} value={sub.id}>
+                  {sub.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          {(selectedCategory !== 'all' || selectedSubcategory !== 'all') && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                setSelectedCategory('all');
+                setSelectedSubcategory('all');
+              }}
+            >
+              Clear Filters
+            </Button>
+          )}
         </div>
       </div>
 
@@ -249,11 +321,11 @@ export const ProductManagement: React.FC = () => {
                 <div className="grid grid-cols-2 gap-3 text-sm">
                   <div>
                     <p className="text-xs text-muted-foreground">Cost</p>
-                    <p className="font-semibold">${product.cost_price.toFixed(2)}</p>
+                    <p className="font-semibold">{formatBDT(product.cost_price)}</p>
                   </div>
                   <div>
                     <p className="text-xs text-muted-foreground">Price</p>
-                    <p className="font-semibold">${product.sell_price.toFixed(2)}</p>
+                    <p className="font-semibold">{formatBDT(product.sell_price)}</p>
                   </div>
                   <div>
                     <p className="text-xs text-muted-foreground">Stock</p>

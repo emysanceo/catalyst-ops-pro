@@ -6,6 +6,7 @@ import { DashboardStats } from '@/types';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { TrendingUp, TrendingDown, Package, DollarSign } from 'lucide-react';
+import { formatBDT } from '@/lib/formatters';
 
 const COLORS = ['hsl(var(--primary))', 'hsl(var(--secondary))', 'hsl(var(--accent))', 'hsl(var(--muted))'];
 
@@ -181,8 +182,10 @@ export const Dashboard: React.FC = () => {
                   tick={{ fontSize: 12 }}
                   tickLine={false}
                   axisLine={false}
+                  tickFormatter={(value) => `৳${value}`}
                 />
                 <Tooltip 
+                  formatter={(value: any) => formatBDT(Number(value))}
                   contentStyle={{ 
                     backgroundColor: 'hsl(var(--background))',
                     border: '1px solid hsl(var(--border))',
@@ -212,8 +215,10 @@ export const Dashboard: React.FC = () => {
                   tick={{ fontSize: 12 }}
                   tickLine={false}
                   axisLine={false}
+                  tickFormatter={(value) => `৳${value}`}
                 />
                 <Tooltip 
+                  formatter={(value: any) => formatBDT(Number(value))}
                   contentStyle={{ 
                     backgroundColor: 'hsl(var(--background))',
                     border: '1px solid hsl(var(--border))',
@@ -255,7 +260,7 @@ export const Dashboard: React.FC = () => {
                       </div>
                     </div>
                     <div className="text-right shrink-0">
-                      <p className="font-semibold">${product.revenue.toFixed(2)}</p>
+                      <p className="font-semibold">{formatBDT(product.revenue)}</p>
                       <p className="text-xs text-muted-foreground">Revenue</p>
                     </div>
                   </div>
@@ -289,7 +294,7 @@ export const Dashboard: React.FC = () => {
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                     ))}
                   </Pie>
-                  <Tooltip />
+                  <Tooltip contentStyle={{ backgroundColor: 'hsl(var(--background))', border: '1px solid hsl(var(--border))' }} />
                 </PieChart>
               </ResponsiveContainer>
             ) : (

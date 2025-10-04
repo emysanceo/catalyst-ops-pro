@@ -12,6 +12,7 @@ export interface Product {
   name: string;
   description?: string;
   category_id?: string;
+  subcategory_id?: string;
   cost_price: number;
   sell_price: number;
   stock: number;
@@ -19,6 +20,23 @@ export interface Product {
   barcode?: string;
   image_url?: string;
   created_by: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Category {
+  id: string;
+  name: string;
+  description?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Subcategory {
+  id: string;
+  category_id: string;
+  name: string;
+  description?: string;
   created_at: string;
   updated_at: string;
 }

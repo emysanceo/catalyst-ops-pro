@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -7,12 +7,17 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Product } from '@/types';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Product, Category, Subcategory } from '@/types';
 import { ArrowLeft } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { formatBDT } from '@/lib/formatters';
 
 const productSchema = z.object({
   name: z.string().min(1, 'Product name is required'),
   description: z.string().optional(),
+  category_id: z.string().optional(),
+  subcategory_id: z.string().optional(),
   image_url: z.string().url('Must be a valid URL').optional().or(z.literal('')),
   cost_price: z.number().min(0.01, 'Cost price must be greater than 0'),
   sell_price: z.number().min(0.01, 'Sell price must be greater than 0'),
@@ -32,16 +37,24 @@ interface ProductFormProps {
 }
 
 export const ProductForm: React.FC<ProductFormProps> = ({ product, onSave, onCancel }) => {
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [subcategories, setSubcategories] = useState<Subcategory[]>([]);
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string>(product?.category_id || '');
+  const [selectedSubcategoryId, setSelectedSubcategoryId] = useState<string>(product?.subcategory_id || '');
+
   const {
     register,
     handleSubmit,
     watch,
+    setValue,
     formState: { errors },
   } = useForm<ProductFormData>({
     resolver: zodResolver(productSchema),
     defaultValues: product ? {
       name: product.name,
       description: product.description || '',
+      category_id: product.category_id || '',
+      subcategory_id: product.subcategory_id || '',
       image_url: product.image_url || '',
       cost_price: product.cost_price,
       sell_price: product.sell_price,
@@ -50,6 +63,8 @@ export const ProductForm: React.FC<ProductFormProps> = ({ product, onSave, onCan
     } : {
       name: '',
       description: '',
+      category_id: '',
+      subcategory_id: '',
       image_url: '',
       cost_price: 0,
       sell_price: 0,
@@ -57,6 +72,32 @@ export const ProductForm: React.FC<ProductFormProps> = ({ product, onSave, onCan
       min_stock: 0,
     },
   });
+
+  useEffect(() => {
+    fetchCategories();
+  }, []);
+
+  useEffect(() => {
+    if (selectedCategoryId) {
+      fetchSubcategories(selectedCategoryId);
+    } else {
+      setSubcategories([]);
+    }
+  }, [selectedCategoryId]);
+
+  const fetchCategories = async () => {
+    const { data } = await supabase.from('categories').select('*').order('name');
+    if (data) setCategories(data);
+  };
+
+  const fetchSubcategories = async (categoryId: string) => {
+    const { data } = await supabase
+      .from('subcategories')
+      .select('*')
+      .eq('category_id', categoryId)
+      .order('name');
+    if (data) setSubcategories(data);
+  };
 
   const cost_price = watch('cost_price');
   const sell_price = watch('sell_price');
@@ -98,7 +139,58 @@ export const ProductForm: React.FC<ProductFormProps> = ({ product, onSave, onCan
 
             <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="cost_price">Cost Price ($)</Label>
+                <Label htmlFor="category_id">Category</Label>
+                <Select
+                  value={selectedCategoryId}
+                  onValueChange={(value) => {
+                    setSelectedCategoryId(value);
+                    setValue('category_id', value);
+                    setSelectedSubcategoryId('');
+                    setValue('subcategory_id', '');
+                  }}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">No category</SelectItem>
+                    {categories.map((cat) => (
+                      <SelectItem key={cat.id} value={cat.id}>
+                        {cat.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="subcategory_id">Subcategory</Label>
+                <Select
+                  value={selectedSubcategoryId}
+                  onValueChange={(value) => {
+                    setSelectedSubcategoryId(value);
+                    setValue('subcategory_id', value);
+                  }}
+                  disabled={!selectedCategoryId || subcategories.length === 0}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select subcategory" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">No subcategory</SelectItem>
+                    {subcategories.map((sub) => (
+                      <SelectItem key={sub.id} value={sub.id}>
+                        {sub.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="cost_price">Cost Price (৳)</Label>
                 <Input
                   id="cost_price"
                   type="number"
@@ -112,7 +204,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({ product, onSave, onCan
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="sell_price">Sell Price ($)</Label>
+                <Label htmlFor="sell_price">Sell Price (৳)</Label>
                 <Input
                   id="sell_price"
                   type="number"
@@ -132,7 +224,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({ product, onSave, onCan
                   Profit Margin: <span className="font-medium text-green-600">{profitMargin}%</span>
                 </p>
                 <p className="text-sm text-muted-foreground">
-                  Profit per unit: <span className="font-medium">${(sell_price - cost_price).toFixed(2)}</span>
+                  Profit per unit: <span className="font-medium">{formatBDT(sell_price - cost_price)}</span>
                 </p>
               </div>
             )}

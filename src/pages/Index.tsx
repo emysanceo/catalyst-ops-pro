@@ -7,7 +7,7 @@ import { ProductManagement } from '@/components/products/ProductManagement';
 import { SalesManagement } from '@/components/sales/SalesManagement';
 import { ExpenseManagement } from '@/components/expenses/ExpenseManagement';
 import { PartnerManagement } from '@/components/partners/PartnerManagement';
-import { ReportsAnalytics } from '@/components/reports/ReportsAnalytics';
+import { EnhancedReportsAnalytics } from '@/components/reports/EnhancedReportsAnalytics';
 import { Settings } from '@/components/settings/Settings';
 import { OfflineIndicator } from '@/components/offline/OfflineIndicator';
 
@@ -61,7 +61,7 @@ const Index = () => {
         if (!['admin', 'partner'].includes(userRole)) {
           return <div className="text-center py-12 text-muted-foreground">Access denied</div>;
         }
-        return <ReportsAnalytics />;
+        return <EnhancedReportsAnalytics />;
       case 'settings':
         return <Settings />;
       default:
